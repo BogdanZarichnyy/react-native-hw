@@ -1,5 +1,5 @@
 import { useState, useEffect } from 'react';
-import { ScrollView, TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, StyleSheet, Text, View, Image, TouchableOpacity, TextInput, Keyboard } from 'react-native';
+import { ScrollView, TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, StyleSheet, Text, View, Image, Pressable, TouchableOpacity, TextInput, Keyboard } from 'react-native';
 
 const BgImage = require('../../images/photo_bg.jpg');
 
@@ -136,7 +136,7 @@ export default function LoginScreen({ navigation }) {
                 
                 <KeyboardAvoidingView style={styles.wrraper} behavior={Platform.OS == "ios" ? "padding" : "height"}>
                     <ScrollView>
-                        <View style={!isLandscape ? styles.login : {...styles.login, marginTop: 80 }}>
+                        <Pressable style={!isLandscape ? styles.login : {...styles.login, marginTop: 80 }}>
                             <Text style={styles.title}>Войти</Text>
                             <TextInput style={isFocusInputEmail ? { ...styles.input, ...onFocus } : styles.input}
                                 onChangeText={inputHandlerEmail}
@@ -165,8 +165,8 @@ export default function LoginScreen({ navigation }) {
                             <TouchableOpacity style={styles.loginBtn} onPress={onPressBtnLogin}>
                                 <Text style={styles.loginBtnText}>Войти</Text>
                             </TouchableOpacity>
-                            <Text style={styles.linkRegistration} onPress={onPressLinkRegistration}>Нет аккаунта? Зарегистрироваться</Text>
-                        </View>
+                            <Text style={styles.linkRegistration}>Нет аккаунта? <Text onPress={onPressLinkRegistration}>Зарегистрироваться</Text></Text>
+                        </Pressable>
                     </ScrollView>
                 </KeyboardAvoidingView>
 
@@ -213,6 +213,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 32,
         paddingBottom: 144,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
         // marginTop: 16
         marginTop: 323,
         // marginTop: "auto",
@@ -226,7 +228,6 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: 'Roboto-Medium',
-        // fontStyle: "normal",
         fontWeight: "500",
         fontSize: 30,
         lineHeight: 35,
@@ -238,6 +239,7 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: "#F6F6F6",
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -265,6 +267,7 @@ const styles = StyleSheet.create({
         padding: 16,
         right: 0,
         // top: 16,
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -280,6 +283,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     loginBtnText: {
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -287,6 +291,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
     },
     linkRegistration: {
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,

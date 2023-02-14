@@ -1,23 +1,38 @@
-import { useCallback, useState, useEffect } from "react";
+import React, { useState, useEffect } from "react";
+
+import { useCallback } from "react";
+import { LogBox } from 'react-native';
+
+import { createRoot } from 'react-dom/client';
 
 import { NavigationContainer } from '@react-navigation/native';
-import { createStackNavigator } from '@react-navigation/stack';
-
-import RegistrationScreen from './screens/auth/RegistrationScreen';
-import LoginScreen from './screens/auth/LoginScreen';
-import { createRoot } from 'react-dom/client';
 
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
-const AuthStack = createStackNavigator();
+// import { useRoute } from './router';
+
+// import { navigationRef, isReadyRef } from './RootNavigation';
+
+import AuthStackNavigator from './AuthStackNavigator';
+import MainTabNavigator from './MainTabNavigator';
+
+LogBox.ignoreLogs(['Sending...']);
 
 export default function App() {
+    // const routing = useRoute(null);
+    // const routing = useRoute(true);
+
+    useEffect(() => {
+        return () => {
+            isReadyRef.current = false
+        };
+    }, []);
 
     const [fontsLoaded] = useFonts({
-        'Roboto-Regular': require("./assets/fonts/Roboto/Roboto-Regular.ttf"),
-        'Roboto-Medium': require("./assets/fonts/Roboto/Roboto-Medium.ttf"),
-        'Roboto-Bold': require("./assets/fonts/Roboto/Roboto-Bold.ttf"),
+        'Roboto-Regular': require("./src/assets/fonts/Roboto/Roboto-Regular.ttf"),
+        'Roboto-Medium': require("./src/assets/fonts/Roboto/Roboto-Medium.ttf"),
+        'Roboto-Bold': require("./src/assets/fonts/Roboto/Roboto-Bold.ttf"),
     });
 
     const onLayoutRootView = useCallback(async () => {
@@ -31,11 +46,15 @@ export default function App() {
     }
 
     return (
-        <NavigationContainer>
-            <AuthStack.Navigator initialRouteName="Registration">
-                <AuthStack.Screen name='Registration' component={RegistrationScreen} options={{ headerShown: false }} />
-                <AuthStack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
-            </AuthStack.Navigator>
+        <NavigationContainer
+            // ref={navigationRef}
+            // onReady={() => {
+            //     isReadyRef.current = true;
+            // }}
+            >
+            {/* {routing} */}
+            {/* <AuthStackNavigator /> */}
+            <MainTabNavigator />
         </NavigationContainer>
     );
 }
@@ -46,3 +65,4 @@ export default function App() {
 
 // export NODE_OPTIONS=--openssl-legacy-provider
 // set NODE_OPTIONS=--openssl-legacy-provider
+// EXPO_NO_TYPESCRIPT_SETUP=1

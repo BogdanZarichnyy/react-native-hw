@@ -5,11 +5,8 @@ import { ScrollView, KeyboardAvoidingView, TouchableWithoutFeedback, SafeAreaVie
 
 import Svg, { Path } from 'react-native-svg';
 
-import AvatarAddIcon from '../../images/cross.svg';
+import AvatarAddIcon from '../../images/add.svg';
 import AvatarDeleteIcon from '../../images/close.svg';
-
-// import RNFS from 'react-native-fs';
-// import path from 'path';
 
 // const avatarPath = path.resolve('../../images/avatar.jpg');
 // console.log(avatarPath);
@@ -17,8 +14,6 @@ import AvatarDeleteIcon from '../../images/close.svg';
 const BgImage = require('../../images/photo_bg.jpg');
 
 const avatarPhoto = require('../../images/avatar.jpg');
-
-let formData = new FormData();
 
 const initialState = {
     avatar: null,
@@ -29,7 +24,7 @@ const initialState = {
 
 export default function RegistrationScreen({ navigation }) {
     const [dimensions, setDimensions] = useState(Dimensions.get('window').width);
-    const [isLandscape, setIsLandscape] = useState(false)
+    const [isLandscape, setIsLandscape] = useState(false);
 
     const [state, setstate] = useState(initialState);
 
@@ -69,12 +64,9 @@ export default function RegistrationScreen({ navigation }) {
             width > height ? setIsLandscape(true) : setIsLandscape(false);
         }
 
-        // Dimensions.addEventListener('change', onChange);
-
         const dimensionsHandler = Dimensions.addEventListener('change', onChange);
         
         return () => {
-            // Dimensions.removeEventListener('change', onChange);
             dimensionsHandler.remove();
         }
     }, []);
@@ -233,7 +225,7 @@ export default function RegistrationScreen({ navigation }) {
                 <KeyboardAvoidingView style={styles.wrraper} behavior={Platform.OS == "ios" ? "padding" : "height"}>
                 
                     <ScrollView>
-                        <View style={ !isLandscape ? styles.register : {...styles.register, marginTop: 80 } }>
+                        <Pressable style={ !isLandscape ? styles.register : {...styles.register, marginTop: 80 } }>
                             <View style={styles.avatar}>
                                 {/* <Image source={require('../images/avatar.jpg')} style={styles.avatarImg} /> */}
                                 { isAvatarUser ?
@@ -263,12 +255,15 @@ export default function RegistrationScreen({ navigation }) {
                                             <AvatarAddIcon style={styles.avatarAddIcon}/>
                                         </Svg> */}
                                         {isAvatarUser ?
-                                            <Svg style={styles.avatarIconX} width="11" height="11" viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg">
-                                                <Path style={styles.avatarAddIconX} fillRule="evenodd" clipRule="evenodd" d="M1.25736 0.550253L0.550258 1.25736L4.7929 5.5L0.550258 9.74264L1.25736 10.4497L5.50001 6.20711L9.74265 10.4497L10.4498 9.74264L6.20711 5.5L10.4498 1.25736L9.74265 0.550253L5.50001 4.79289L1.25736 0.550253Z"/>
-                                            </Svg> :
-                                            <Svg style={styles.avatarIcon} width="13" height="13" viewBox="0 0 13 13" xmlns="http://www.w3.org/2000/svg">
-                                                <Path style={styles.avatarAddIcon} fillRule="evenodd" clipRule="evenodd" d="M7 0H6V6H0V7H6V13H7V7H13V6H7V0Z"/>
-                                            </Svg>
+                                            // <Svg style={styles.avatarIconX} width="11" height="11" viewBox="0 0 11 11" xmlns="http://www.w3.org/2000/svg">
+                                            //     <Path style={styles.avatarAddIconX} fillRule="evenodd" clipRule="evenodd" d="M1.25736 0.550253L0.550258 1.25736L4.7929 5.5L0.550258 9.74264L1.25736 10.4497L5.50001 6.20711L9.74265 10.4497L10.4498 9.74264L6.20711 5.5L10.4498 1.25736L9.74265 0.550253L5.50001 4.79289L1.25736 0.550253Z"/>
+                                            // </Svg>
+                                            <AvatarDeleteIcon width={11} height={11} />
+                                            :
+                                            // <Svg style={styles.avatarIcon} width="13" height="13" viewBox="0 0 13 13" xmlns="http://www.w3.org/2000/svg">
+                                            //     <Path style={styles.avatarAddIcon} fillRule="evenodd" clipRule="evenodd" d="M7 0H6V6H0V7H6V13H7V7H13V6H7V0Z"/>
+                                            // </Svg>
+                                            <AvatarAddIcon width={13} height={13} />
                                         }
                                     {/* </View> */}
                                 </Pressable>
@@ -309,14 +304,14 @@ export default function RegistrationScreen({ navigation }) {
                                 />
                                 <Text style={styles.hiddenPassword} onPress={hiddenPassword}>{isHiddenPassword ? "Показать" : "Спрятать"}</Text>
                             </View>
-                            <TouchableOpacity  style={styles.registerBtn} onPress={onPressBtnRegister}>
+                            <TouchableOpacity style={styles.registerBtn} onPress={onPressBtnRegister}>
                                 <Text style={styles.registerBtnText}>Зарегистрироваться</Text>
                             </TouchableOpacity >
-                            <Text style={styles.linkAuth} onPress={onPressLinkAuth}>Уже есть аккаунт? Войти</Text>
-                        </View>
+                            <Text style={styles.linkAuth}>Уже есть аккаунт? <Text onPress={onPressLinkAuth}>Войти</Text></Text>
+                        </Pressable>
                     </ScrollView>
 
-                    <StatusBar style="auto" />
+                    {/* <StatusBar style="auto" /> */}
 
                 </KeyboardAvoidingView>
 
@@ -363,6 +358,8 @@ const styles = StyleSheet.create({
         paddingHorizontal: 16,
         paddingTop: 92,
         paddingBottom: 78,
+        borderTopLeftRadius: 25,
+        borderTopRightRadius: 25,
         // marginTop: 16
         marginTop: 263,
         // marginTop: "auto",
@@ -475,7 +472,6 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: 'Roboto-Medium',
-        // fontStyle: "normal",
         fontWeight: "500",
         fontSize: 30,
         lineHeight: 35,
@@ -487,6 +483,7 @@ const styles = StyleSheet.create({
     },
     input: {
         backgroundColor: "#F6F6F6",
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -514,6 +511,7 @@ const styles = StyleSheet.create({
         padding: 16,
         right: 0,
         // top: 16,
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -529,6 +527,7 @@ const styles = StyleSheet.create({
         marginBottom: 16,
     },
     registerBtnText: {
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
@@ -536,6 +535,7 @@ const styles = StyleSheet.create({
         color: "#FFFFFF",
     },
     linkAuth: {
+        fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
