@@ -1,27 +1,40 @@
 import React, { useState, useEffect } from "react";
 
+import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { StyleSheet, View, Pressable } from 'react-native';
+// import { useNavigation } from '@react-navigation/native';
 
-import Home from './src/screens/main/Home';
-import CreatePostsScreen from './src/screens/main/CreatePostsScreen';
-import ProfileScreen from './src/screens/main/ProfileScreen';
+import { navigate } from './RootNavigation';
 
-import PostsIcon from './src/images/grid.svg';
-import CreatePostIcon from './src/images/union.svg';
-import ProfileIcon from './src/images/user.svg';
-import BackIcon from './src/images/arrow_left.svg';
+import RegistrationScreen from '../screens/auth/RegistrationScreen';
+import LoginScreen from '../screens/auth/LoginScreen';
 
-import { useNavigation } from '@react-navigation/native';
+import Home from '../screens/main/Home';
+import CreatePostsScreen from '../screens/main/CreatePostsScreen';
+import ProfileScreen from '../screens/main/ProfileScreen';
 
-export const navigationRef = React.createRef();
+import PostsIcon from '../images/grid.svg';
+import CreatePostIcon from '../images/union.svg';
+import ProfileIcon from '../images/user.svg';
+import BackIcon from '../images/arrow_left.svg';
 
+const AuthStack = createStackNavigator();
 const MainTab = createBottomTabNavigator();
 
-const MainTabNavigator = () => {
-    const navigation = useNavigation();
+export const useRoute = (isAuth) => {
+    // const navigation = useNavigation();
 
+    if (!isAuth) {
+        return (
+            <AuthStack.Navigator initialRouteName="Registration">
+                <AuthStack.Screen name='Registration' component={RegistrationScreen} options={{ headerShown: false }} />
+                <AuthStack.Screen name='Login' component={LoginScreen} options={{ headerShown: false }} />
+            </AuthStack.Navigator>
+        );
+    }
+    
     return (
         <MainTab.Navigator screenOptions={styles.mainTabContainer}>
             <MainTab.Screen name="Home" component={Home} options={{
@@ -47,7 +60,8 @@ const MainTabNavigator = () => {
                     </View>
                 ),
                 headerLeft: () => (
-                    <Pressable onPress={() => navigation.goBack()}>
+                    // <Pressable onPress={() => navigation.goBack()}>
+                    <Pressable onPress={() => navigate("Home")}>
                         <BackIcon style={{ marginLeft: 20 }} />
                     </Pressable>
                 ),
@@ -62,7 +76,7 @@ const MainTabNavigator = () => {
                 )
             }} />
         </MainTab.Navigator>
-    )
+    );
 }
 
 const styles = StyleSheet.create({
@@ -83,5 +97,3 @@ const styles = StyleSheet.create({
         },
     }
 })
-
-export default MainTabNavigator;

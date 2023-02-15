@@ -10,12 +10,12 @@ import { NavigationContainer } from '@react-navigation/native';
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
-// import { useRoute } from './router';
+// import { useRoute } from './src/router';
 
-// import { navigationRef, isReadyRef } from './RootNavigation';
+// import { navigationRef, isReadyRef } from './src/RootNavigation';
 
-import AuthStackNavigator from './AuthStackNavigator';
-import MainTabNavigator from './MainTabNavigator';
+import AuthStackNavigator from './src/router/AuthStackNavigator';
+import MainTabNavigator from './src/router/MainTabNavigator';
 
 LogBox.ignoreLogs(['Sending...']);
 
@@ -23,11 +23,11 @@ export default function App() {
     // const routing = useRoute(null);
     // const routing = useRoute(true);
 
-    useEffect(() => {
-        return () => {
-            isReadyRef.current = false
-        };
-    }, []);
+    // useEffect(() => {
+    //     return () => {
+    //         isReadyRef.current = false
+    //     };
+    // }, []);
 
     const [fontsLoaded] = useFonts({
         'Roboto-Regular': require("./src/assets/fonts/Roboto/Roboto-Regular.ttf"),

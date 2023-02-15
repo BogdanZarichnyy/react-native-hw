@@ -45,7 +45,7 @@ const initialState = [
     },
 ];
 
-const ProfileScreen = () => { 
+const ProfileScreen = ({ navigation }) => { 
     const [dimensions, setDimensions] = useState(Dimensions.get('window').width);
     const [isLandscape, setIsLandscape] = useState(false);
 
