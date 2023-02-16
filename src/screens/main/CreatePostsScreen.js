@@ -1,4 +1,5 @@
-import { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
+import { Camera, CameraType } from 'expo-camera';
 import { TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, Keyboard, ScrollView, Pressable, View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
 import CameraIcon from '../../images/camera.svg';
@@ -6,6 +7,10 @@ import CameraWhiteIcon from '../../images/camera_white.svg';
 import MapPinIcon from '../../images/map_pin.svg';
 import TrashIcon from '../../images/trash.svg';
 import TrashIconActive from '../../images/trash_active.svg';
+
+import * as Location from 'expo-location';
+
+// import Geolocation from '@react-native-community/geolocation';
 
 const postPhoto = require('../../images/wood.jpg');
 
@@ -19,12 +24,69 @@ const CreatePostsScreen = ({ navigation }) => {
     const [isFocusInputTitle, setIsFocusInputTitle] = useState(false);
     const [isFocusInputAddress, setIsFocusInputAdress] = useState(false);
 
+    const [type, setType] = useState(CameraType.back);
+    const [snap, setSnap] = useState(null);
+    const [photo, setPhoto] = useState('');
+
+    const [hasPermission, setHasPermission] = useState(null);
+    // const [isCameraReady, setIsCameraReady] = useState(false);
+
+    // const cameraRef = useRef();
+
+    const [location, setLocation] = useState(null);
+    const [errorMsg, setErrorMsg] = useState(null);
+
+
     const onFocus = {
         // backgroundColor: "#FFFFFF",
         color: "#212121",
         borderColor: "#FF6C00",
         stroke: "#FF6C00",
     }
+
+    // useEffect(() => {
+    //     (async () => {
+    //         let { status } = await Location.requestForegroundPermissionsAsync();
+
+    //         if (status !== 'granted') {
+    //             setErrorMsg('Permission to access location was denied');
+    //             return;
+    //         }
+
+    //         let location = await Location.getCurrentPositionAsync({});
+    //         setLocation(location);
+    //     })();
+    // }, []);
+
+    useEffect(() => {
+        (async () => {
+            let { status } = await Location.requestForegroundPermissionsAsync();
+            if (status !== "granted") {
+                setErrorMsg("Permission to access location was denied");
+                return;
+            }
+            console.log(status);
+            let location = await Location.getCurrentPositionAsync({});
+            console.log("location:", location);
+            const coords = {
+                latitude: location.coords.latitude,
+                longitude: location.coords.longitude,
+            };
+            // console.log(coords);
+            setLocation(coords);
+        })();
+    }, []);
+
+    // useEffect(() => {
+    //     !!location ? null : alert('Please wait while setting coordinates');
+    // }, [location]);
+
+    useEffect(() => {
+        (async () => {
+            const { status } = await Camera.requestCameraPermissionsAsync();
+            setHasPermission(status === "granted");
+        })();
+    }, []);
 
     useEffect(() => {
         navigation.setOptions({
@@ -65,6 +127,17 @@ const CreatePostsScreen = ({ navigation }) => {
         }
     }, []);
 
+    let text = 'Waiting..';
+    if (errorMsg) {
+        text = errorMsg;
+    } else if (location) {
+        text = JSON.stringify(location);
+    }
+
+    const onCameraReady = () => {
+        setIsCameraReady(true);
+    };
+
     const addPhoto = () => {
         console.log('addPhoto');
     }
@@ -73,8 +146,29 @@ const CreatePostsScreen = ({ navigation }) => {
         console.log('deletePhoto');
     }
 
+    const toggleCameraType = () => {
+        setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    }
+
+    const takePhoto = async () => {
+        // console.log(snap.takePictureAsync());
+
+        // snap && setSnap(null);
+        // snap && await snap.resumePreview();
+
+        // await snap.resumePreview();
+        const photo = await snap.takePictureAsync();
+
+        setPhoto(photo.uri);
+    }
+
+    const updatephoto = () => {
+        // await snap.resumePreview();
+        setPhoto('');
+    }
+
     const inputHandlerTitle = (text) => {
-        console.log(text);
+        // console.log(text);
         setIsTitle(text);
     }
 
@@ -87,7 +181,7 @@ const CreatePostsScreen = ({ navigation }) => {
     }
 
     const inputHandlerAddress = (text) => {
-        console.log(text);
+        // console.log(text);
         setIsAddress(text);
     }
 
@@ -101,18 +195,26 @@ const CreatePostsScreen = ({ navigation }) => {
 
     const onPressPublishBtn = () => {
         console.log('onPressPublishBtn');
-        console.log(title);
-        console.log(address);
+        // console.log(photo);
+        // console.log(title);
+        // console.log(address);
+        setPhoto('');
+        // setSnap(null);
         setIsTitle('');
         setIsAddress('');
+
+        navigation.navigate('Posts', { photo, title, address, location });
     }
 
     const onPressDeleteBtn = () => {
         console.log('onPressDeleteBtn');
-        title && console.log(title);
-        address && console.log(address);
+        // photo && console.log(photo);
+        // title && console.log(title);
+        // address && console.log(address);
+        photo && setPhoto('');
         title && setIsTitle('');
         address && setIsAddress('');
+        // snap && setSnap(null);
     }
 
     return (
@@ -126,19 +228,42 @@ const CreatePostsScreen = ({ navigation }) => {
                             <View style={styles.public}>
 
                                 <View style={isLandscape ? { ...styles.wrraperImage, width: 350 } : styles.wrraperImage}>
+                                    <Camera style={isLandscape ? { ...styles.wrraperImage, width: 350 } : styles.wrraperImage} type={type} ref={setSnap} >
+                                        {!!photo ?
+                                            <Image source={{ uri: photo }} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                                            : null
+                                        }
+                                        {!photo ?
+                                            (!location ? null : 
+                                                < TouchableOpacity style={styles.camera} onPress={takePhoto}>
+                                                    <CameraIcon style={styles.cameraIcon} width={24} height={24} />
+                                                </TouchableOpacity>
+                                            )
+                                            :
+                                            <TouchableOpacity style={{ ...styles.camera, backgroundColor: "rgba(255, 255, 255, 0.3)" }} onPress={updatephoto}>
+                                                <CameraWhiteIcon style={styles.cameraIcon} width={24} height={24} />
+                                            </TouchableOpacity>
+                                        }
+                                    </Camera>
+                                </View>
+
+                                {/* <View style={isLandscape ? { ...styles.wrraperImage, width: 350 } : styles.wrraperImage}>
                                     <TouchableOpacity style={styles.camera} onPress={addPhoto}>
                                         <CameraIcon style={styles.cameraIcon} width={24} height={24} />
                                     </TouchableOpacity>
-                                    {/* <Image source={postPhoto} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                                    <Image source={postPhoto} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
                                     <TouchableOpacity style={{...styles.camera, backgroundColor: "rgba(255, 255, 255, 0.3)" }} onPress={deletePhoto}>
                                         <CameraWhiteIcon style={styles.cameraIcon} width={24} height={24} />
-                                    </TouchableOpacity> */}
-                                </View>
+                                    </TouchableOpacity>
+                                </View> */}
 
                                 {/* <Image source={require('../../images/wood.jpg')} style={ isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage } /> */}
 
-                                <Text style={isLandscape ? { ...styles.info, textAlign: "left" } : styles.info}>Загрузите фото</Text>
-                                {/* <Text style={isLandscape ? { ...styles.info, textAlign: "left" } : styles.info}>Редактировать фото</Text> */}
+                                {!photo ?
+                                    <Text style={isLandscape ? { ...styles.info, textAlign: "left" } : styles.info}>Загрузите фото</Text>
+                                    :
+                                    <Text style={isLandscape ? { ...styles.info, textAlign: "left" } : styles.info}>Редактировать фото</Text>
+                                }
 
                                 <TextInput style={isFocusInputTitle ? { ...styles.input, ...onFocus } : styles.input}
                                     onChangeText={inputHandlerTitle}
@@ -219,17 +344,17 @@ const styles = StyleSheet.create({
         
         justifyContent: "center",
         alignItems: "center",
+        overflow: "hidden"
     },
     camera: {
         position: "absolute",
         left: "50%",
         top: "50%",
-        // transform: [{translateX: -width / 7 + 16}, {translateY: -30}],
         transform: [{translateX: -30}, {translateY: -30}],
         width: 60,
         height: 60,
         backgroundColor: "#FFFFFF",
-        borderRadius: "50%",
+        borderRadius: 50,
         justifyContent: "center",
         alignItems: "center",
     },
@@ -237,6 +362,11 @@ const styles = StyleSheet.create({
         fill: "#BDBDBD"
     },
     postImage: {
+        position: "absolute",
+        top: 0,
+        left: 0,
+        right: 0,
+        bottom: 0,
         width: "100%",
         borderRadius: 8,
         resizeMode: "cover",
@@ -244,7 +374,7 @@ const styles = StyleSheet.create({
     info: {
         marginTop: 8,
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         color: "#BDBDBD",
@@ -253,7 +383,7 @@ const styles = StyleSheet.create({
         // width: "100%",
         marginTop: 32,
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         paddingVertical: 15,

@@ -132,7 +132,7 @@ const ProfileScreen = ({ navigation }) => {
                                 { isAvatarUser ?
                                     <Image source={avatarPhoto} style={styles.avatarImg} />
                                 :
-                                    <Image source="" style={styles.avatarImg} />
+                                    null
                                 }
                                 <Pressable style={isAvatarUser ? styles.btnAvatarX : styles.btnAvatar} onPress={onPressBtnAvatar}>
                                         {isAvatarUser ?
@@ -296,7 +296,7 @@ const styles = StyleSheet.create({
     },
     login: {
         fontFamily: 'Roboto-Bold',
-        fontWeight: 500,
+        fontWeight: "500",
         fontSize: 30,
         lineHeight: 35,
         textAlign: "center",
@@ -318,7 +318,7 @@ const styles = StyleSheet.create({
     },
     title: {
         fontFamily: 'Roboto-Medium',
-        fontWeight: 500,
+        fontWeight: "500",
         fontSize: 16,
         lineHeight: 19,
         marginTop: 8
@@ -339,7 +339,7 @@ const styles = StyleSheet.create({
     },
     commentsCount: {
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         color: "#212121",
@@ -355,7 +355,7 @@ const styles = StyleSheet.create({
     },
     likesCount: {
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         color: "#212121",
@@ -370,7 +370,7 @@ const styles = StyleSheet.create({
     },
     address: {
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         textAlign: "right",

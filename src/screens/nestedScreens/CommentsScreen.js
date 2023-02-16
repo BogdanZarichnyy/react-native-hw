@@ -104,6 +104,9 @@ const CommentsScreen = ({ navigation }) => {
     }
     const addCommentHandler = () => {
         setIsFocusInputComment(false);
+        if (!comment) {
+            return;
+        }
         console.log(comment);
         setComment('');
         setComments([...comments, {
@@ -146,8 +149,8 @@ const CommentsScreen = ({ navigation }) => {
                                     placeholder="Комментировать..."
                                     textAlign="left"
                                     inputMode="text"
-                                    multiline="true"
-                                    rows="5"
+                                    // multiline="true"
+                                    // rows="5"
                                     value={comment}
                                     placeholderTextColor="#BDBDBD"
                                     onFocus={onFocusInputComment}
@@ -221,7 +224,7 @@ const styles = StyleSheet.create({
     avatar: {
         width: 28,
         height: 28,
-        borderRadius: "50%",
+        borderRadius: 50,
     },
     comment: {
         flex: 1,
@@ -236,7 +239,7 @@ const styles = StyleSheet.create({
     },
     text: {
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 13,
         lineHeight: 18,
         color: "#212121"
@@ -244,7 +247,7 @@ const styles = StyleSheet.create({
     date: {
         marginTop: 8,
         fontFamily: 'Roboto-Medium',
-        fontWeight: 400,
+        fontWeight: "400",
         fontSize: 10,
         lineHeight: 12,
         textAlign: "right",
@@ -262,13 +265,14 @@ const styles = StyleSheet.create({
         // paddingHorizontal: 16,
     },
     input: {
+        height: 50,
         backgroundColor: "#F6F6F6",
         fontFamily: 'Roboto-Medium',
         fontWeight: "400",
         fontSize: 16,
         lineHeight: 19,
         color: "#BDBDBD",
-        padding: 16,
+        padding: 15,
         paddingRight: 50,
         borderWidth: 1,
         borderColor: "#E8E8E8",
@@ -281,10 +285,10 @@ const styles = StyleSheet.create({
     addButton: {
         position: "absolute",
         top: 8,
-        right: 9,
-        width: 37,
-        height: 37,
-        borderRadius: "50%",
+        right: 8,
+        width: 34,
+        height: 34,
+        borderRadius: 50,
         backgroundColor: "#FF6C00",
         justifyContent: "center",
         alignItems: "center"

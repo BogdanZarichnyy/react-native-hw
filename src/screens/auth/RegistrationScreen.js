@@ -231,7 +231,7 @@ export default function RegistrationScreen({ navigation }) {
                                 { isAvatarUser ?
                                     <Image source={avatarPhoto} style={styles.avatarImg} />
                                 :
-                                    <Image source="" style={styles.avatarImg} />
+                                    null
                                 }
                                 {/* <Image source={{ uri: avatarUser }} style={styles.avatarImg} id="avatar" /> */}
                                 {/* <Pressable style={styles.btnAvatarWrraper} onPress={onPressBtnAvatar}>
