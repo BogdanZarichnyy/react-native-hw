@@ -1,6 +1,9 @@
 import { useState, useEffect } from 'react';
 import { ScrollView, TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, StyleSheet, Text, View, Image, Pressable, TouchableOpacity, TextInput, Keyboard } from 'react-native';
 
+import { useDispatch } from 'react-redux';
+import { authSignInUser } from '../../redux/auth/authOperations';
+
 const BgImage = require('../../images/photo_bg.jpg');
 
 const initialState = {
@@ -21,6 +24,8 @@ export default function LoginScreen({ navigation }) {
     const [isFocusInputPassword, setIsFocusInputPassword] = useState(false);
 
     const [isHiddenPassword, setIsHiddenPassword] = useState(true);
+
+    const dispatch = useDispatch();
 
     const onFocus = {
         backgroundColor: "#FFFFFF",
@@ -120,6 +125,7 @@ export default function LoginScreen({ navigation }) {
 
         Keyboard.dismiss();
         console.log(state);
+        dispatch(authSignInUser(state));
         setstate(initialState);
     }
 
@@ -162,8 +168,8 @@ export default function LoginScreen({ navigation }) {
                                 />
                                 <Text style={styles.hiddenPassword} onPress={hiddenPassword}>{isHiddenPassword ? "Показать" : "Спрятать"}</Text>
                             </View>
-                            <TouchableOpacity style={styles.loginBtn} onPress={onPressBtnLogin}>
-                                <Text style={styles.loginBtnText}>Войти</Text>
+                            <TouchableOpacity style={!state.email || !state.password ? {...styles.loginBtn, backgroundColor: "#F6F6F6" } : styles.loginBtn} activeOpacity={!!state.email || !!state.password ? 0.2 : 1} onPress={!state.email || !state.password ? null : onPressBtnLogin}>
+                                <Text style={!state.email || !state.password ? { ...styles.loginBtnText, color: "#BDBDBD" } : styles.loginBtnText}>Войти</Text>
                             </TouchableOpacity>
                             <Text style={styles.linkRegistration}>Нет аккаунта? <Text onPress={onPressLinkRegistration}>Зарегистрироваться</Text></Text>
                         </Pressable>

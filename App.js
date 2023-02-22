@@ -1,25 +1,45 @@
-import React, { useState, useEffect } from "react";
+import React from "react";
 
 import { useCallback } from "react";
 import { LogBox } from 'react-native';
 
-import { createRoot } from 'react-dom/client';
+// import { createRoot } from 'react-dom/client';
 
-import { NavigationContainer } from '@react-navigation/native';
+// import { NavigationContainer } from '@react-navigation/native';
 
 import { useFonts } from 'expo-font';
 import * as SplashScreen from 'expo-splash-screen';
 
-// import { useRoute } from './src/router';
+import { Provider } from 'react-redux';
+import { store } from './src/redux/store';
+
+// import { useRoute } from './src/router/router';
 
 // import { navigationRef, isReadyRef } from './src/RootNavigation';
 
-import AuthStackNavigator from './src/router/AuthStackNavigator';
-import MainTabNavigator from './src/router/MainTabNavigator';
+// import AuthStackNavigator from './src/router/AuthStackNavigator';
+// import MainTabNavigator from './src/router/MainTabNavigator';
+
+// import { db, auth } from './src/firebase/config';
+// import { getAuth, onAuthStateChanged } from "firebase/auth";
+
+import Main from './src/components/Main';
 
 LogBox.ignoreLogs(['Sending...']);
+LogBox.ignoreLogs(['Warning: AsyncStorage Storage has been extracted from react-native core']);
 
 export default function App() {
+    // const [isLogin, setIsLogin] = useState(false);
+    // const state = useSelector(state => state);
+
+    // console.log(state);
+
+    // onAuthStateChanged(auth, (user) => console.log('user change', user));
+
+    // useEffect(() => {
+
+    // }, []);
+
     // const routing = useRoute(null);
     // const routing = useRoute(true);
 
@@ -46,16 +66,22 @@ export default function App() {
     }
 
     return (
-        <NavigationContainer
-            // ref={navigationRef}
-            // onReady={() => {
-            //     isReadyRef.current = true;
-            // }}
-            >
-            {/* {routing} */}
-            {/* <AuthStackNavigator /> */}
-            <MainTabNavigator />
-        </NavigationContainer>
+        <Provider store={store}>
+            {/* <NavigationContainer
+                // ref={navigationRef}
+                // onReady={() => {
+                //     isReadyRef.current = true;
+                // }}
+                > */}
+                {/* {routing} */}
+                {/* {isLogin ? 
+                    <MainTabNavigator />
+                :
+                    <AuthStackNavigator />
+                } */}
+            {/* </NavigationContainer> */}
+            <Main />
+        </Provider>
     );
 }
 

@@ -1,47 +1,22 @@
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from 'react-redux';
+
 import { TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, Keyboard, ScrollView, Pressable, View, Text, StyleSheet, Image, FlatList } from 'react-native';
 
 import CommentsIcon from '../../images/message_circle.svg';
 import MapPinIcon from '../../images/map_pin.svg';
 
-const avatarPhoto = require('../../images/avatar.jpg');
+import { db } from "../../firebase/config";
+import { collection, getDocs, doc, onSnapshot } from "firebase/firestore";
 
-const initialState = [
-    // {
-    //     id: '1',
-    //     photo: '../../images/wood.jpg',
-    //     title: 'Лес',
-    //     comments: [1,2,3,4,5,6,7,8,9],
-    //     likes: '153',
-    //     address: 'Ukraine',
-    //     addressMap: '',
-    //     owner: ''
-    // },
-    // {
-    //     id: '2',
-    //     photo: '../../images/black_sea.jpg',
-    //     title: 'Закат на Черном море',
-    //     comments: [1,2,3,4,5,6],
-    //     likes: '200',
-    //     address: 'Ukraine',
-    //     addressMap: '',
-    //     owner: ''
-    // },
-    // {
-    //     id: '3',
-    //     photo: '../../images/house.jpg',
-    //     title: 'Старый домик в Венеции',
-    //     comments: [1,2,3,4,5,6,7],
-    //     likes: '200',
-    //     address: 'Italy',
-    //     addressMap: '',
-    //     owner: ''
-    // },
-];
+const avatarPhoto = require('../../images/avatar.jpg');
 
 const PostsScreen = ({ navigation, route }) => {
     const [isLandscape, setIsLandscape] = useState(false);
-    const [posts, setPosts] = useState(initialState);
+    const [posts, setPosts] = useState([]);
+
+    const userLogin = useSelector(state => state.authSlice.userLogin);
+    const userEmail = useSelector(state => state.authSlice.userEmail);
 
     useEffect(() => { 
         const width = Dimensions.get('window').width;
@@ -65,19 +40,37 @@ const PostsScreen = ({ navigation, route }) => {
         }
     }, []);
 
-    useEffect(() => { 
-        if (route.params === undefined) {
-            return;
+    // useEffect(() => {
+    //     if (route.params === undefined) {
+    //         return;
+    //     }
+    //     setPosts([...posts, {
+    //         id: Date.now(),
+    //         comments: [],
+    //         likes: '',
+    //         ...route.params,
+    //         addressMap: '',
+    //         owner: ''
+    //     }]);
+    // }, [route.params]);
+    
+    useEffect(() => {
+        getPosts();
+    }, []);
+
+    const getPosts = async () => {
+        try {
+            const posts = await onSnapshot(collection(db, "posts"), (data) => {
+                // console.log('data', data);
+                setPosts(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            });
+
+            // console.log('posts', posts);
         }
-        setPosts([...posts, {
-            id: Date.now(),
-            comments: [],
-            likes: '',
-            ...route.params,
-            addressMap: '',
-            owner: ''
-        }]);
-    }, [route.params]);
+        catch (error) {
+            console.log(error);
+        }
+    }
 
     // console.log(route);
 
@@ -92,8 +85,8 @@ const PostsScreen = ({ navigation, route }) => {
                             <View style={styles.userInfo}>
                                 <Image source={avatarPhoto} style={styles.avatarImage}/>
                                 <View style={styles.user}>
-                                    <Text style={styles.name}>Natali Romanova</Text>
-                                    <Text style={styles.email}>email@example.com</Text>
+                                    <Text style={styles.name}>{userLogin}</Text>
+                                    <Text style={styles.email}>{userEmail}</Text>
                                 </View>
                             </View>
 
@@ -120,16 +113,20 @@ const PostsScreen = ({ navigation, route }) => {
 
                             <View style={isLandscape ? { ...styles.posts, alignItems: "center" } : styles.posts}>
 
-                                {posts.map((item, index) =>
+                                {console.log('posts',posts)}
+                                { posts.map((item, index) =>
                                     <View key={item.id} style={ item[index] === posts.length - 1 ? { ...styles.post, marginBottom: 0 } : styles.post } >
                                         {/* <Image source={require('../../images/wood.jpg')} style={ isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage } /> */}
-                                        <Image source={{ uri: item.photo }} style={ isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage } />
+                                        <Image source={{ uri: item.photo }} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                                        {/* <Image source={{ uri: 'https://firebasestorage.googleapis.com/v0/b/react-native-hw-fad6f.appspot.com/o/postsImages%2F1676910278016?alt=media&token=a19c7d9c-c880-4c3a-9352-6d613f842e8a' }} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} /> */}
+                                        
                                         <Text style={styles.title}>{item.title}</Text>
 
                                         <View style={styles.postInfo}>
-                                            <Pressable style={styles.comments} onPress={() => navigation.navigate("Comments")}>
+                                            <Pressable style={styles.comments} onPress={() => navigation.navigate("Comments", { postId: item.id, photo: item.photo })}>
                                                 <CommentsIcon style={styles.commentsIcon} width={24} height={24} />
-                                                <Text style={styles.commentsCount}>{item.comments.length}</Text>
+                                                {/* <Text style={styles.commentsCount}>{item.comments.length}</Text> */}
+                                                <Text style={styles.commentsCount}>0</Text>
                                             </Pressable>
                                             <Pressable style={styles.addressInfo} onPress={() => navigation.navigate("Map", { location: item.location })}>
                                                 <MapPinIcon style={styles.addressIcon} width={24} height={24} />

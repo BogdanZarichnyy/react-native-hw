@@ -39,7 +39,9 @@
       "NSCameraUsageDescription": "This app uses the camera to scan barcodes on event tickets.",
       "NSLocationAlwaysAndWhenInUseUsageDescription": "Your location is required for xyz benefits for you",
       "NSLocationAlwaysUsageDescription": "Your location is required for xyz benefits for you",
-      "NSLocationWhenInUseUsageDescription": "Your location is required for xyz benefits for you"
+      "NSLocationWhenInUseUsageDescription": "Your location is required for xyz benefits for you",
+      "NSPhotoLibraryUsageDescription": "Your location is required for xyz benefits for you",
+      "NSMicrophoneUsageDescription ": "Your location is required for xyz benefits for you"
     }
   }
 }

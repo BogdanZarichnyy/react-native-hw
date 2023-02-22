@@ -1,7 +1,12 @@
 import { useState, useEffect } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import { TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, Keyboard, ScrollView, Pressable, View, Text, StyleSheet, Image, TextInput, TouchableOpacity } from 'react-native';
 
 import VectorIcon from '../../images/vector.svg';
+
+import { db, storage } from '../../firebase/config';
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { collection, doc, addDoc, updateDoc, onSnapshot, where, query } from "firebase/firestore";
 
 const avatarPhoto = require('../../images/avatar.jpg');
 const ellipsePhoto = require('../../images/ellipse.jpg');
@@ -11,7 +16,7 @@ const postPhoto = require('../../images/black_sea.jpg');
 const initialState = [
     {
         id: '1',
-        avatar: '../../images/ellipse.jpg',
+        // avatar: '../../images/ellipse.jpg',
         text: 'Really love your most recent photo. I’ve been trying to capture the same thing for a few months and would love some tips!',
         date: '09 июня, 2020 | 08:40',
         post: '',
@@ -19,7 +24,7 @@ const initialState = [
     },
     {
         id: '2',
-        avatar: '../../images/avatar.jpg',
+        // avatar: '../../images/avatar.jpg',
         text: 'A fast 50mm like f1.8 would help with the bokeh. I’ve been using primes as they tend to get a bit sharper images.',
         date: '09 июня, 2020 | 09:14',
         post: '',
@@ -27,7 +32,7 @@ const initialState = [
     },
     {
         id: '3',
-        avatar: '../../images/ellipse.jpg',
+        // avatar: '../../images/ellipse.jpg',
         text: 'Thank you! That was very helpful!',
         date: '09 июня, 2020 | 09:20',
         post: '',
@@ -37,19 +42,29 @@ const initialState = [
 
 const width = Dimensions.get('window').width;
 
-const CommentsScreen = ({ navigation }) => {
+const CommentsScreen = ({ navigation, route }) => {
     const [isLandscape, setIsLandscape] = useState(false);
-    const [comments, setComments] = useState(initialState);
-
+    const [comments, setComments] = useState([]);
+    const [postId, setPostId] = useState('');
     const [comment, setComment] = useState('');
 
     const [isFocusInputComment, setIsFocusInputComment] = useState(false);
+
+    const userId = useSelector((state) => state.authSlice.userId);
 
     const onFocus = {
         backgroundColor: "#FFFFFF",
         color: "#212121",
         borderColor: "#FF6C00"
     }
+
+    useEffect(() => { 
+        if (route.params === undefined) {
+            return;
+        }
+        const { postId } = route.params;
+        setPostId(postId);
+    }, [route.params]);
 
     useEffect(() => {
         navigation.getParent()?.setOptions({
@@ -90,6 +105,44 @@ const CommentsScreen = ({ navigation }) => {
         }
     }, []);
 
+    useEffect(() => {
+        getComments();
+    }, []);
+
+    const getComments = async () => {
+        try {
+            // const docRef = doc(db, "posts", postId);
+            // const commentsRef = collection(docRef, "comments");
+            // const comments = await onSnapshot(commentsRef, (data) => {
+            //     setComments(data);
+            //     // console.log("data.docs: ", data.docs[0].data());
+            //     // setComments(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            // });
+
+            // await onSnapshot(collection(db, "posts"), (data) => {
+            //     // console.log('data', data);
+            //     setComments(data);
+            //     // setPosts(post.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            // });
+
+            // const docRef = doc(db, "posts", postId);
+            // const commentsRef = collection(docRef, "comments");
+            // console.log(commentsRef);
+
+            // db.firestore().collection('posts').doc(postId).collection('comments').onSnapshot(setComments(data.docs.map((doc) => ({ ...doc.data() }))))ж
+
+            const docRef = doc(db, "posts", route.params.postId);
+            const commentsRef = collection(docRef, "comments");
+            const newComment = await onSnapshot(commentsRef, (data) => {
+                // console.log("data.docs: ============>", data.docs[0].data());
+                setComments(data.docs.map((doc) => ({ ...doc.data(), id: doc.id })));
+            });
+        }
+        catch (error) {
+            console.log(error);
+        }
+    }
+
     const inputHandlerComment = (text) => {
         setComment(text);
         console.log(text);
@@ -102,21 +155,91 @@ const CommentsScreen = ({ navigation }) => {
     const onBlurInputComment = () => {
         setIsFocusInputComment(false);
     }
-    const addCommentHandler = () => {
-        setIsFocusInputComment(false);
-        if (!comment) {
-            return;
+
+    const transformMonth = (numberOfMonth) => { 
+        const months = [ 'января', 'февраля', 'марта', 'апреля', 'мая', 'июня', 'июля', 'августа', 'сентября', 'ноября', 'декабря' ];
+
+        let month;
+
+        switch (numberOfMonth) {
+            case 0: month = months[0]; break;
+            case 1: month = months[1]; break;
+            case 2: month = months[2]; break;
+            case 3: month = months[3]; break;
+            case 4: month = months[4]; break;
+            case 5: month = months[5]; break;
+            case 6: month = months[6]; break;
+            case 7: month = months[7]; break;
+            case 8: month = months[8]; break;
+            case 9: month = months[9]; break;
+            case 10: month = months[10]; break;
+            case 11: month = months[11]; break;
+            default: break;
         }
-        console.log(comment);
-        setComment('');
-        setComments([...comments, {
-            id: Date.now().toString(),
-            avatar: '../../images/ellipse.jpg',
-            text: comment,
-            date: Date.now().toString(),
-            post: '',
-            owner: ''
-        }]);
+
+        return month;
+    }
+
+    const addCommentHandler = async () => {
+        try {
+            setIsFocusInputComment(false);
+
+            if (!comment) {
+                return;
+            }
+
+            // setComment('');
+            // setComments([...comments, {
+            //     // avatar: '../../images/ellipse.jpg',
+            //     text: comment,
+            //     date: Date.now().toString(),
+            //     postId,
+            //     owner: userId
+            // }]);
+
+            const nowDate = new Date();
+            const day = nowDate.getDate();
+            const numberOfMonth = nowDate.getMonth();
+            const month = await transformMonth(numberOfMonth);
+            const year = nowDate.getFullYear();
+            const hours = nowDate.getHours();
+            const minutes = nowDate.getMinutes().toString().padStart(2, 0);
+            const dateText = `${day} ${month}, ${year} | ${hours}:${minutes}`;
+
+            // console.log(dateText);
+
+            const commentPost = {
+                text: comment,
+                date: dateText,
+                postId,
+                owner: userId
+            }
+
+            setComment('');
+
+            // const docRef = doc(db, "posts", postId);
+
+            // const addComment = await updateDoc(docRef, commentPost)
+            //     .then(docRef => {
+            //         console.log("A New Document Field has been added to an existing document", docRef);
+            //     })
+            //     .catch(error => {
+            //         console.log(error);
+            //     });
+
+            // console.log(addComment);
+            
+            const docRef = doc(db, "posts", postId);
+            const commentsRef = collection(docRef, "comments");
+            const newComment = await addDoc(commentsRef, commentPost);
+            
+            // const addComment = await updateDoc(query(collection(db, "posts"), where('postId', '==', postId)), {
+            //     comments: commentPost,
+            // });            
+        }
+        catch (error) {
+            console.log(error);
+        }
     }
 
     return (
@@ -126,15 +249,28 @@ const CommentsScreen = ({ navigation }) => {
                     <ScrollView>
 
                         <Pressable style={isLandscape ? { ...styles.content, alignItems: "center" } : styles.content}>
-
-                            <Image source={postPhoto} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                            
+                            {route.params === undefined ?
+                                <Image source={postPhoto} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                                :
+                                <Image source={{ uri: route.params.photo }} style={isLandscape ? { ...styles.postImage, width: 350 } : styles.postImage} />
+                            }
 
                             <View style={styles.comments}>
+
+                                {/* {console.log(comments)} */}
+                                
                                 {comments.map((item, index) => 
-                                    // <View key={item.id} style={index % 2 ? { ...styles.commentInfo, flexDirection: "row-reverse" } : styles.commentInfo} > width: `${ isLandscape ? "350": "100%" }`
                                     <View key={item.id} style={index % 2 ? { ...styles.commentInfo, flexDirection: "row-reverse", width: isLandscape ? 350 : "100%" } : { ...styles.commentInfo, width: isLandscape ? 350 : "100%" }} >
-                                        <Image source={avatarPhoto} style={styles.avatar} />
-                                        {/* <Image source={{ uri: item.avatar }} style={styles.avatar} /> */}
+                                        
+                                        {/* <Image source={avatarPhoto} style={styles.avatar} /> */}
+
+                                        {item.avatar === undefined ?
+                                            <Image source={ellipsePhoto} style={styles.avatar} />
+                                            :
+                                            <Image source={{ uri: item.avatar }} style={styles.avatar} />
+                                        }
+
                                         <View style={index % 2 ? { ...styles.comment, marginLeft: 0, marginRight: 16, borderTopRightRadius: 0, borderTopLeftRadius: 6,} : styles.comment}>
                                             <Text style={styles.text}>{item.text}</Text>
                                             <Text style={index % 2 ? { ...styles.date, textAlign: "left" } : styles.date}>{item.date}</Text>
@@ -210,6 +346,7 @@ const styles = StyleSheet.create({
     postImage: {
         // flex: 1,
         width: "100%",
+        height: 240,
         borderRadius: 8,
         resizeMode: "cover",
     },

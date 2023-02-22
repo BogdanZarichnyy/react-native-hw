@@ -2,6 +2,9 @@ import React from "react";
 
 import { createStackNavigator } from '@react-navigation/stack';
 
+import { useDispatch } from 'react-redux';
+import { authSignOutUser } from '../../redux/auth/authOperations';
+
 import { View, Pressable, Text, StyleSheet } from 'react-native';
 
 import PostsScreen from '../nestedScreens/PostsScreen';
@@ -14,8 +17,10 @@ import LogOutIcon from '../../images/logout.svg';
 const NestedScreenStack = createStackNavigator();
 
 const Home = (props) => {
+    const dispatch = useDispatch();
 
     const logOut = () => {
+        dispatch(authSignOutUser());
         console.log('Logout');
     }
 

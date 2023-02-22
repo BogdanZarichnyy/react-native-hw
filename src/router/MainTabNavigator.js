@@ -18,6 +18,9 @@ import { useNavigation } from '@react-navigation/native';
 const MainTab = createBottomTabNavigator();
 
 const MainTabNavigator = () => {
+    // console.log('navigation', navigation);
+    // console.log('route', route);
+
     const navigation = useNavigation();
 
     return (
@@ -44,11 +47,16 @@ const MainTabNavigator = () => {
                         <CreatePostIcon fill={focused ? "#fff" : "#212121"}/>
                     </View>
                 ),
-                headerLeft: () => (
-                    <Pressable onPress={() => navigation.goBack()}>
-                        <BackIcon style={{ marginLeft: 20 }} />
-                    </Pressable>
-                ),
+                headerLeft: () => {
+                    // console.log('navigation', navigation);
+                    return (
+                        // <Pressable onPress={() => navigation.goBack("Home")}>
+                        <Pressable onPress={() => navigation.goBack()}>
+                            <BackIcon style={{ marginLeft: 20 }} />
+                        </Pressable>
+                        
+                    )
+                },
             }} />
             <MainTab.Screen name="Profile" component={ProfileScreen} options={{
                 headerShown: false,

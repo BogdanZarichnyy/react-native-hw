@@ -4,9 +4,9 @@ import { createStackNavigator } from '@react-navigation/stack';
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs';
 
 import { StyleSheet, View, Pressable } from 'react-native';
-// import { useNavigation } from '@react-navigation/native';
+import { useNavigation } from '@react-navigation/native';
 
-import { navigate } from './RootNavigation';
+// import { navigate } from './RootNavigation';
 
 import RegistrationScreen from '../screens/auth/RegistrationScreen';
 import LoginScreen from '../screens/auth/LoginScreen';
@@ -24,7 +24,7 @@ const AuthStack = createStackNavigator();
 const MainTab = createBottomTabNavigator();
 
 export const useRoute = (isAuth) => {
-    // const navigation = useNavigation();
+    const navigation = useNavigation();
 
     if (!isAuth) {
         return (
@@ -60,8 +60,8 @@ export const useRoute = (isAuth) => {
                     </View>
                 ),
                 headerLeft: () => (
-                    // <Pressable onPress={() => navigation.goBack()}>
-                    <Pressable onPress={() => navigate("Home")}>
+                    <Pressable onPress={() => navigation.goBack()}>
+                    {/* <Pressable onPress={() => navigate("Home")}> */}
                         <BackIcon style={{ marginLeft: 20 }} />
                     </Pressable>
                 ),

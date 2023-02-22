@@ -1,4 +1,5 @@
 import { useState, useEffect, useRef } from "react";
+import { useSelector, useDispatch } from 'react-redux';
 import { Camera, CameraType } from 'expo-camera';
 import { TouchableWithoutFeedback, SafeAreaView, KeyboardAvoidingView, Platform, Dimensions, Keyboard, ScrollView, Pressable, View, Text, TextInput, StyleSheet, Image, TouchableOpacity } from 'react-native';
 
@@ -10,14 +11,20 @@ import TrashIconActive from '../../images/trash_active.svg';
 
 import * as Location from 'expo-location';
 
+import * as MediaLibrary from "expo-media-library";
+
+import { db, storage } from '../../firebase/config';
+import { ref, getDownloadURL, uploadBytes } from "firebase/storage";
+import { collection, addDoc } from "firebase/firestore";
+
 // import Geolocation from '@react-native-community/geolocation';
 
 const postPhoto = require('../../images/wood.jpg');
 
-const width = Dimensions.get('window').width;
-const height = Dimensions.get('window').height;
+// const width = Dimensions.get('window').width;
+// const height = Dimensions.get('window').height;
 
-const CreatePostsScreen = ({ navigation }) => {
+const CreatePostsScreen = ({ navigation, route }) => {
     const [isLandscape, setIsLandscape] = useState(false);
     const [title, setIsTitle] = useState('');
     const [address, setIsAddress] = useState('');
@@ -36,6 +43,7 @@ const CreatePostsScreen = ({ navigation }) => {
     const [location, setLocation] = useState(null);
     const [errorMsg, setErrorMsg] = useState(null);
 
+    const userId = useSelector((state) => state.authSlice.userId);
 
     const onFocus = {
         // backgroundColor: "#FFFFFF",
@@ -68,6 +76,7 @@ const CreatePostsScreen = ({ navigation }) => {
             console.log(status);
             let location = await Location.getCurrentPositionAsync({});
             console.log("location:", location);
+
             const coords = {
                 latitude: location.coords.latitude,
                 longitude: location.coords.longitude,
@@ -128,26 +137,77 @@ const CreatePostsScreen = ({ navigation }) => {
     }, []);
 
     let text = 'Waiting..';
+
     if (errorMsg) {
         text = errorMsg;
     } else if (location) {
         text = JSON.stringify(location);
     }
 
-    const onCameraReady = () => {
-        setIsCameraReady(true);
-    };
+    // const onCameraReady = () => {
+    //     setIsCameraReady(true);
+    // };
 
-    const addPhoto = () => {
-        console.log('addPhoto');
+    // const addPhoto = () => {
+    //     console.log('addPhoto');
+    // }
+
+    // const deletePhoto = () => {
+    //     console.log('deletePhoto');
+    // }
+
+    // const toggleCameraType = () => {
+    //     setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    // }
+
+    const uploadPhotoToServer = async () => {
+        try {
+            const response = await fetch(photo);
+            // console.log("response:", response);
+            const file = await response.blob();
+
+            const uniquePostId = Date.now().toString();
+
+            const storageRef = await ref(storage, `postsImages/${uniquePostId}`);
+            console.log('storageRef', storageRef);
+
+            await uploadBytes(storageRef, file).then((photo) => console.log("Uploaded a blob photo", photo));
+
+            const downloadedPhoto = await getDownloadURL(storageRef)
+                .then(data => data)
+                .catch((error) => {
+                    console.log(error);
+                });
+            
+            console.log("downloadedPhoto:", downloadedPhoto);
+            
+            return downloadedPhoto;
+        } catch (error) {
+            console.error(error);
+        }
     }
 
-    const deletePhoto = () => {
-        console.log('deletePhoto');
-    }
-
-    const toggleCameraType = () => {
-        setType(current => (current === CameraType.back ? CameraType.front : CameraType.back));
+    const uploadPostToServer = async () => {
+        try {
+            const photo = await uploadPhotoToServer();
+            // console.log('photoUrl', photoUrl);
+    
+            const post = {
+                userId,
+                photo,
+                title,
+                address,
+                location,
+                likes: 0
+            };
+    
+            console.log(post);
+    
+            const createPost = await addDoc(collection(db, "posts"), post);
+            console.log("Document written with ID: ", createPost);
+        } catch (error) {
+            console.error(error);
+        }
     }
 
     const takePhoto = async () => {
@@ -193,7 +253,7 @@ const CreatePostsScreen = ({ navigation }) => {
         setIsFocusInputAdress(false);
     }
 
-    const onPressPublishBtn = () => {
+    const onPressPublishBtn = async () => {
         console.log('onPressPublishBtn');
         // console.log(photo);
         // console.log(title);
@@ -202,8 +262,15 @@ const CreatePostsScreen = ({ navigation }) => {
         // setSnap(null);
         setIsTitle('');
         setIsAddress('');
+        // setLocation('');
 
-        navigation.navigate('Posts', { photo, title, address, location });
+        Keyboard.dismiss();
+        // const photoUrl = await uploadPhotoToServer();
+
+       await uploadPostToServer();
+        
+        // navigation.navigate('Posts', { photo, title, address, location });
+        navigation.navigate('Posts');
     }
 
     const onPressDeleteBtn = () => {
@@ -214,6 +281,7 @@ const CreatePostsScreen = ({ navigation }) => {
         photo && setPhoto('');
         title && setIsTitle('');
         address && setIsAddress('');
+        // location && setIsetLocationsAddress('');
         // snap && setSnap(null);
     }
 
@@ -387,6 +455,7 @@ const styles = StyleSheet.create({
         fontSize: 16,
         lineHeight: 19,
         paddingVertical: 15,
+        // padding: 15,
         borderBottomWidth: 1,
         borderColor: "#E8E8E8",
     },

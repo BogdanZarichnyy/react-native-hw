@@ -8,6 +8,9 @@ import Svg, { Path } from 'react-native-svg';
 import AvatarAddIcon from '../../images/add.svg';
 import AvatarDeleteIcon from '../../images/close.svg';
 
+import { useDispatch } from 'react-redux';
+import { authSignUpUser } from '../../redux/auth/authOperations';
+
 // const avatarPath = path.resolve('../../images/avatar.jpg');
 // console.log(avatarPath);
 
@@ -40,6 +43,8 @@ export default function RegistrationScreen({ navigation }) {
     const [isFocusInputPassword, setIsFocusInputPassword] = useState(false);
 
     const [isHiddenPassword, setIsHiddenPassword] = useState(true);
+
+    const dispatch = useDispatch();
 
     const onFocus = {
         backgroundColor: "#FFFFFF",
@@ -106,19 +111,19 @@ export default function RegistrationScreen({ navigation }) {
     const inputHandlerLogin = (text) => {
         // setLogin(text);
         setstate((prevState) => ({ ...prevState, login: text}));
-        console.log(login);
+        console.log(text);
     }
 
     const inputHandlerEmail = (text) => {
         // setEmail(text);
         setstate((prevState) => ({ ...prevState, email: text}));
-        console.log(email);
+        console.log(text);
     }
 
     const inputHandlerPassword = (text) => {
         // setPassword(text);
         setstate((prevState) => ({ ...prevState, password: text}));
-        console.log(password);
+        console.log(text);
     }
 
     const onFocusInputLogin = () => {
@@ -208,12 +213,13 @@ export default function RegistrationScreen({ navigation }) {
 
         Keyboard.dismiss();
         console.log(state);
+        dispatch(authSignUpUser(state));
         setstate(initialState);
     }
 
     const onPressLinkAuth = () => {
         console.log('Go to LoginScreen');
-        navigation.navigate("Login")
+        navigation.navigate("Login");
     }
 
     return (
@@ -304,8 +310,8 @@ export default function RegistrationScreen({ navigation }) {
                                 />
                                 <Text style={styles.hiddenPassword} onPress={hiddenPassword}>{isHiddenPassword ? "Показать" : "Спрятать"}</Text>
                             </View>
-                            <TouchableOpacity style={styles.registerBtn} onPress={onPressBtnRegister}>
-                                <Text style={styles.registerBtnText}>Зарегистрироваться</Text>
+                            <TouchableOpacity style={!state.login || !state.email || !state.password ? {...styles.registerBtn, backgroundColor: "#F6F6F6" } : styles.registerBtn} activeOpacity={!!state.login || !!state.email || !!state.password ? 0.2 : 1} onPress={!state.login || !state.email || !state.password ? null : onPressBtnRegister}>
+                                <Text style={!state.login || !state.email || !state.password ? {...styles.registerBtnText, color: "#BDBDBD"} : styles.registerBtnText}>Зарегистрироваться</Text>
                             </TouchableOpacity >
                             <Text style={styles.linkAuth}>Уже есть аккаунт? <Text onPress={onPressLinkAuth}>Войти</Text></Text>
                         </Pressable>
